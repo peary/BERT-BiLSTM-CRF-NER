@@ -28,107 +28,10 @@ from lstm_crf_layer import BLSTM_CRF
 import tf_metrics
 import pickle
 
-os.environ['CUDA_VISIBLE_DEVICES'] = '1'
+# os.environ['CUDA_VISIBLE_DEVICES'] = '1'
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
-flags = tf.flags
-
-FLAGS = flags.FLAGS
-
-if os.name == 'nt':
-    bert_path = 'H:\迅雷下载\chinese_L-12_H-768_A-12\chinese_L-12_H-768_A-12'
-    root_path = r'C:\workspace\python\BERT-BiLSMT-CRF-NER'
-else:
-    bert_path = '/home/macan/ml/data/chinese_L-12_H-768_A-12/'
-    root_path = '/home/macan/ml/workspace/BERT-BiLSTM-CRF-NER'
-
-flags.DEFINE_string(
-    "data_dir", os.path.join(root_path, 'NERdata'),
-    "The input datadir.",
-)
-
-flags.DEFINE_string(
-    "bert_config_file", os.path.join(bert_path, 'bert_config.json'),
-    "The config json file corresponding to the pre-trained BERT model."
-)
-
-flags.DEFINE_string(
-    "task_name", 'ner', "The name of the task to train."
-)
-
-flags.DEFINE_string(
-    "output_dir", os.path.join(root_path, 'output'),
-    "The output directory where the model checkpoints will be written."
-)
-
-## Other parameters
-flags.DEFINE_string(
-    "init_checkpoint", os.path.join(bert_path, 'bert_model.ckpt'),
-    "Initial checkpoint (usually from a pre-trained BERT model)."
-)
-
-flags.DEFINE_bool(
-    "do_lower_case", True,
-    "Whether to lower case the input text."
-)
-
-flags.DEFINE_integer(
-    "max_seq_length", 128,
-    "The maximum total input sequence length after WordPiece tokenization."
-)
-
-flags.DEFINE_boolean('clean', True, 'remove the files which created by last training')
-
-flags.DEFINE_bool("do_train", True, "Whether to run training."
-)
-flags.DEFINE_bool("use_tpu", False, "Whether to use TPU or GPU/CPU.")
-
-flags.DEFINE_bool("do_eval", True, "Whether to run eval on the dev set.")
-
-flags.DEFINE_bool("do_predict", True, "Whether to run the model in inference mode on the test set.")
-
-flags.DEFINE_integer("train_batch_size", 64, "Total batch size for training.")
-
-flags.DEFINE_integer("eval_batch_size", 8, "Total batch size for eval.")
-
-flags.DEFINE_integer("predict_batch_size", 8, "Total batch size for predict.")
-
-flags.DEFINE_float("learning_rate", 5e-5, "The initial learning rate for Adam.")
-
-flags.DEFINE_float("num_train_epochs", 15.0, "Total number of training epochs to perform.")
-flags.DEFINE_float('droupout_rate', 0.5, 'Dropout rate')
-flags.DEFINE_float('clip', 5, 'Gradient clip')
-flags.DEFINE_float(
-    "warmup_proportion", 0.1,
-    "Proportion of training to perform linear learning rate warmup for. "
-    "E.g., 0.1 = 10% of training.")
-
-flags.DEFINE_integer("save_checkpoints_steps", 1000,
-                     "How often to save the model checkpoint.")
-
-flags.DEFINE_integer("iterations_per_loop", 1000,
-                     "How many steps to make in each estimator call.")
-
-flags.DEFINE_string("vocab_file", os.path.join(bert_path, 'vocab.txt'),
-                    "The vocabulary file that the BERT model was trained on.")
-
-tf.flags.DEFINE_string("master", None, "[Optional] TensorFlow master URL.")
-flags.DEFINE_integer(
-    "num_tpu_cores", 8,
-    "Only used if `use_tpu` is True. Total number of TPU cores to use.")
-flags.DEFINE_string('data_config_path', os.path.join(root_path, 'data.conf'),
-                    'data config file, which save train and dev config')
-# lstm parame
-flags.DEFINE_integer('lstm_size', 128, 'size of lstm units')
-flags.DEFINE_integer('num_layers', 1, 'number of rnn layers, default is 1')
-flags.DEFINE_string('cell', 'lstm', 'which rnn cell used')
-
-# 移除模型中的Adam相关参数，使得最终模型文件为300-400M， 不会是原来的1.2G， 移除后的模型可以用于预测阶段。
-#Add code to remove the adam related parameters in the model, and reduce the size of the model file from 1.3GB to 400MB.
-# https://github.com/google-research/bert/issues/99
-# If  True last model'adam related parameters will be removed, False not
-flags.DEFINE_boolean('filter_adam_var', True, 'remove all the adam variables of model')
-
+from tf_flags import FLAGS
 
 
 class InputExample(object):
@@ -147,6 +50,7 @@ class InputExample(object):
         self.guid = guid
         self.text = text
         self.label = label
+
 
 class InputFeatures(object):
     """A single set of features of data."""
